@@ -5,71 +5,46 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Divine</title>
 
-  <!-- Early cookie check: if the divine_access cookie is missing, immediately redirect to /404.html.
-       This runs before styles/scripts are fetched so the protected page won't flash for unauthorized users. -->
-  <script>
-  (function(){
-    try {
-      var has = document.cookie.split(';').some(function(c){ return c.trim().indexOf('divine_access=') === 0; });
-    } catch (e) {
-      // if document.cookie access throws for any reason, treat as no cookie
-      var has = false;
-    }
-    if (!has) {
-      // Replace so the unauthorized page doesn't remain in history
-      location.replace('/404.html' + location.search + location.hash);
-    }
-  })();
-  </script>
-
-  <!-- Early lockdown check: if lockdown is enabled (from admin panel), redirect to /lockdown immediately.
-       This runs before styles/scripts are fetched so the protected page won't flash during lockdown. -->
-  <script>
-  (function(){
-    var PANEL_HOST = "https://dv-panel.giize.com";
-    var STATE_URL = PANEL_HOST + "/api/state";
-
-    function goLockdown(){
-      if (location.pathname === "/lockdown" || location.pathname.indexOf("/lockdown/") === 0) return;
-      location.replace("/lockdown" + location.search + location.hash);
-    }
-
-    try {
-      fetch(STATE_URL, { cache: "no-store" })
-        .then(function(res){ return res.json(); })
-        .then(function(json){
-          if (!json || !json.ok) return;
-          if (json.lockdown && json.lockdown.enabled) goLockdown();
-        })
-        .catch(function(){});
-    } catch (e) {
-      // ignore
-    }
-  })();
-  </script>
+  <!-- NOTE (Batman): Cookie/lockdown checks are now handled by the Node server in the revamp.
+       This page stays clean and does not include the old admin panel checks. -->
 
   <link rel="icon" href="/divine/assets/divine-fav.png" />
-  <!-- Use absolute paths so assets load whether the URL has a trailing slash or not -->
   <link rel="stylesheet" href="/divine/styles.css" />
 </head>
 <body>
-  <!-- Announcement banner: full-width, sticky -->
   <div class="announcement" role="banner" aria-live="polite">
     We've just opened! Have a divine experience!
   </div>
 
-  <!-- Main container -->
   <main class="container" id="main" role="main">
-    <!-- Top-left emoji toggle (regular flow so it won't overlap banner) -->
-    <button id="theme-toggle" class="theme-toggle" aria-pressed="true" aria-label="Toggle theme">☀️</button>
+    <!-- Top bar: DM (left) + Profile (right) -->
+    <div class="topbar" aria-label="Top bar">
+      <!-- Envelope (DM menu) -->
+      <a class="icon-btn" href="/divine/dm/" aria-label="Direct messages">
+        <!-- envelope icon -->
+        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 6h16v12H4V6Z" stroke="currentColor" stroke-width="2" opacity="0.95"/>
+          <path d="m4 7 8 7 8-7" stroke="currentColor" stroke-width="2" opacity="0.95"/>
+        </svg>
+        <span class="badge-dot req" aria-hidden="true"></span>
+        <span class="badge-dot msg" aria-hidden="true"></span>
+      </a>
 
-    <!-- Centered title area -->
+      <!-- Profile -->
+      <a class="icon-btn" href="/divine/profile/" aria-label="Your profile">
+        <!-- user icon -->
+        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2" opacity="0.95"></circle>
+          <path d="M4 20c0-3.3137 3.134-6 8-6s8 2.6863 8 6" stroke="currentColor" stroke-width="2" opacity="0.95"></path>
+        </svg>
+      </a>
+    </div>
+
     <header class="title-area" role="heading" aria-level="1">
       <h1 class="site-title">Welcome to <span class="brand">Divine</span></h1>
       <p class="tagline">Divine fun in every corner</p>
     </header>
 
-    <!-- Grid of buttons -->
     <nav class="grid" aria-label="Main navigation">
       <a class="tile" href="/divine/games">Games</a>
       <a class="tile" href="/divine/browse">Browse</a>
@@ -83,18 +58,20 @@
     </nav>
 
     <div class="meta">
-      <div class="version">Site Version: 1.0.0</div>
+      <div class="version">Site Version: 2.0.0 (Revamp WIP)</div>
     </div>
   </main>
 
   <footer class="site-footer" role="contentinfo">
-    <p class="disclaimer">Disclaimer: This website and its contents are provided for entertainment purposes only. We are not responsible for any misuse of the services offered, including violations of any rules, laws, or regulations. Use at your own risk.</p>
+    <p class="disclaimer">
+      Disclaimer: This website and its contents are provided for entertainment purposes only.
+      We are not responsible for any misuse of the services offered, including violations of any rules, laws, or regulations.
+      Use at your own risk.
+    </p>
   </footer>
 
+  <!-- NOTE (Batman): We will replace /divine/script.js later with the new app-level JS (DM dots, profile, etc).
+       For now, keep it if it doesn't conflict. -->
   <script src="/divine/script.js"></script>
-
-  <!-- Admin panel client: realtime broadcasts + lockdown enforcement for /divine/* pages -->
-  <script src="/divine/panel-client.js"></script>
-  <script src="/divine/access-client.js"></script>
 </body>
 </html>
