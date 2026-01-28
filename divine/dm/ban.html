@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DM Banned - Divine</title>
+  <link rel="icon" href="/divine/assets/divine-fav.png" />
+  <style>
+    :root {
+      --bg0: #05050a;
+      --bg1: #070816;
+      --gold: #FFD700;
+      --gold2: #ffd24a;
+      --purple: #a34bff;
+      --purple2: #6d2bd6;
+      --text: #f6f1ff;
+      --muted: rgba(246,241,255,0.72);
+      --line: rgba(255,255,255,0.10);
+      --panel: rgba(255,255,255,0.06);
+      --danger: #ff3b3b;
+      --success: #2ecc71;
+    }
+    
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    
+    body {
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 700px at 10% -10%, #161640, transparent),
+        radial-gradient(900px 600px at 120% 10%, #1c0f2a, transparent),
+        radial-gradient(900px 700px at 70% 120%, #0c1626, transparent),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow-x: hidden;
+    }
+    
+    body::before {
+      content: "";
+      position: fixed;
+      inset: -30%;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(closest-side at 24% 18%, rgba(163,75,255,0.20), transparent 60%),
+        radial-gradient(closest-side at 70% 70%, rgba(255,215,0,0.14), transparent 60%),
+        radial-gradient(closest-side at 70% 14%, rgba(79,176,229,0.12), transparent 55%);
+      filter: blur(24px);
+      animation: drift 14s ease-in-out infinite alternate;
+      opacity: 0.85;
+    }
+    
+    @keyframes drift {
+      0% { transform: translate3d(-2%, -1%, 0) rotate(-2deg) scale(1.02); }
+      100% { transform: translate3d(2%, 1%, 0) rotate(2deg) scale(1.06); }
+    }
+    
+    .card {
+      position: relative;
+      z-index: 1;
+      width: 680px;
+      max-width: 96%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 40px 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+    }
+    
+    h1 {
+      margin: 0 0 12px;
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--danger);
+      text-align: center;
+    }
+    
+    .subtitle {
+      margin: 0 0 24px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+    
+    .banInfo {
+      margin: 24px 0;
+      padding: 18px 20px;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      line-height: 1.6;
+    }
+    
+    .banInfo p {
+      margin: 8px 0;
+    }
+    
+    .banInfo strong {
+      color: var(--gold);
+      font-weight: 900;
+    }
+    
+    .appealSection {
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+    }
+    
+    .appealSection h2 {
+      margin: 0 0 16px;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+    
+    .appealForm {
+      display: none;
+      margin-top: 16px;
+    }
+    
+    .appealForm.show {
+      display: block;
+    }
+    
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(0,0,0,0.35);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 1rem;
+      resize: vertical;
+      outline: none;
+    }
+    
+    textarea:focus {
+      border-color: var(--purple);
+    }
+    
+    .btnRow {
+      margin-top: 16px;
+      display: flex;
+      gap: 12px;
+    }
+    
+    button {
+      flex: 1;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .btnPrimary {
+      background: linear-gradient(135deg, var(--gold) 0%, var(--purple) 100%);
+      color: #000;
+    }
+    
+    .btnPrimary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(163,75,255,0.4);
+    }
+    
+    .btnSecondary {
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+    
+    .btnSecondary:hover:not(:disabled) {
+      background: rgba(255,255,255,0.12);
+    }
+    
+    .message {
+      margin-top: 12px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-weight: 700;
+      text-align: center;
+    }
+    
+    .message.error {
+      background: rgba(255,59,59,0.15);
+      color: var(--danger);
+      border: 1px solid rgba(255,59,59,0.3);
+    }
+    
+    .message.success {
+      background: rgba(46,204,113,0.15);
+      color: var(--success);
+      border: 1px solid rgba(46,204,113,0.3);
+    }
+    
+    .backLink {
+      margin-top: 24px;
+      text-align: center;
+    }
+    
+    .backLink a {
+      color: var(--purple);
+      text-decoration: none;
+      font-weight: 700;
+    }
+    
+    .backLink a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="card" role="main">
+    <h1>⛔ DM Access Restricted</h1>
+    <p class="subtitle">You have been banned from using Direct Messages.</p>
+    
+    <div class="banInfo" id="banInfo">
+      <p><strong>Reason:</strong> <span id="banReason">Loading...</span></p>
+      <p><strong>Duration:</strong> <span id="banDuration">Loading...</span></p>
+    </div>
+    
+    <div class="appealSection">
+      <h2>Appeal Your Ban</h2>
+      <p class="subtitle">You can submit an appeal below. Appeals are reviewed by site owners.</p>
+      
+      <button class="btnPrimary" id="showAppealBtn" type="button">Submit Appeal</button>
+      
+      <div class="appealForm" id="appealForm">
+        <textarea id="appealText" placeholder="Explain why you believe this ban should be reconsidered..." maxlength="1000"></textarea>
+        <div class="btnRow">
+          <button class="btnSecondary" id="cancelAppealBtn" type="button">Cancel</button>
+          <button class="btnPrimary" id="submitAppealBtn" type="button">Submit Appeal</button>
+        </div>
+        <div class="message" id="appealMessage" style="display: none;"></div>
+      </div>
+    </div>
+    
+    <div class="backLink">
+      <a href="/divine/">← Back to Home</a>
+    </div>
+  </div>
+  
+  <script src="/divine/dm/ban.js"></script>
+</body>
+</html>

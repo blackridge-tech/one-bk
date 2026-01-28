@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Direct Messages - Divine</title>
+  <link rel="icon" href="/divine/assets/divine-fav.png" />
+  <link rel="stylesheet" href="/divine/dm/styles.css" />
+</head>
+<body>
+  <div class="dmContainer">
+    <!-- Sidebar: Thread List -->
+    <aside class="sidebar">
+      <div class="sidebarHeader">
+        <h1 class="title">Messages</h1>
+        <button class="btnIcon" id="newDmBtn" title="New Message">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Pending Requests -->
+      <div class="requestSection" id="requestSection" style="display: none;">
+        <div class="requestHeader">
+          <span class="requestTitle">Pending Requests</span>
+          <span class="requestBadge" id="requestBadge">0</span>
+        </div>
+        <div class="requestList" id="requestList"></div>
+      </div>
+
+      <!-- Thread List -->
+      <div class="threadList" id="threadList">
+        <div class="emptyState">No messages yet</div>
+      </div>
+
+      <div class="sidebarFooter">
+        <a href="/divine/" class="backLink">← Back to Home</a>
+      </div>
+    </aside>
+
+    <!-- Main: Chat View -->
+    <main class="chatView" id="chatView">
+      <div class="emptyChat">
+        <svg class="emptyIcon" viewBox="0 0 24 24" fill="none">
+          <path d="M4 6h16v12H4V6Z" stroke="currentColor" stroke-width="2" opacity="0.95"/>
+          <path d="m4 7 8 7 8-7" stroke="currentColor" stroke-width="2" opacity="0.95"/>
+        </svg>
+        <p>Select a conversation to start messaging</p>
+      </div>
+
+      <!-- Active chat (hidden by default) -->
+      <div class="activeChat" id="activeChat" style="display: none;">
+        <div class="chatHeader">
+          <div class="chatHeaderUser">
+            <div class="userAvatar" id="chatUserAvatar">?</div>
+            <div class="chatHeaderInfo">
+              <div class="chatHeaderName" id="chatHeaderName">Username</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="messagesContainer" id="messagesContainer">
+          <div class="messagesList" id="messagesList"></div>
+        </div>
+
+        <div class="chatInput">
+          <textarea id="messageInput" placeholder="Type a message..." rows="1" maxlength="2000"></textarea>
+          <button class="btnSend" id="sendBtn" type="button">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- New DM Modal -->
+  <div class="modal" id="newDmModal" style="display: none;">
+    <div class="modalContent">
+      <div class="modalHeader">
+        <h2>New Message</h2>
+        <button class="btnClose" id="closeModalBtn">&times;</button>
+      </div>
+      <div class="modalBody">
+        <label for="userSearch">Search for a user:</label>
+        <input type="text" id="userSearch" placeholder="Type username..." autocomplete="off" />
+        <div class="searchResults" id="searchResults"></div>
+
+        <div class="inviteSection" id="inviteSection" style="display: none;">
+          <label for="inviteMessage">Optional invite message:</label>
+          <textarea id="inviteMessage" placeholder="Hi! Let's chat..." maxlength="500" rows="3"></textarea>
+          <button class="btnPrimary" id="sendInviteBtn" type="button">Send Invite</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/divine/dm/script.js"></script>
+</body>
+</html>

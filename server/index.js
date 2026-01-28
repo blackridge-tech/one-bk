@@ -1707,6 +1707,29 @@ app.post("/api/dm/appeal", async (req, res) => {
   }
 });
 
+app.get("/api/dm/ban-info", async (req, res) => {
+  try {
+    const user = await requireUser(req, res);
+    if (!user) return;
+
+    const ban = await getDmBan(user.id);
+    if (!ban) {
+      return res.json({ ok: true, ban: null });
+    }
+
+    return res.json({
+      ok: true,
+      ban: {
+        reason: ban.ban_reason || "",
+        bannedUntil: Number(ban.banned_until || 0),
+        createdAt: Number(ban.created_at || 0)
+      }
+    });
+  } catch {
+    return res.status(500).json({ ok: false, error: "Server error" });
+  }
+});
+
 // -----------------------
 // Auth protect /divine/* (including /divine/profile/*) + activity logging + redirect-on-next-load
 // -----------------------
