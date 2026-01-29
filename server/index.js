@@ -256,6 +256,14 @@ CREATE TABLE IF NOT EXISTS users (
 
   await dbRun(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username);`);
 
+  // Add last_seen_at column if it doesn't exist (migration)
+  try {
+    await dbRun(`ALTER TABLE users ADD COLUMN last_seen_at INTEGER NOT NULL DEFAULT 0;`);
+  } catch {
+    // Column already exists
+  }
+  await dbRun(`CREATE INDEX IF NOT EXISTS idx_users_last_seen ON users(last_seen_at);`);
+
   // Owner-controlled state (lockdown + future flags)
   await dbRun(`
 CREATE TABLE IF NOT EXISTS owner_state (
@@ -392,6 +400,10 @@ async function isUserBanned(userRow) {
   if (!userRow) return false;
   const until = parseInt(userRow.banned_until || "0", 10);
   return until && nowMs() < until;
+}
+
+async function updateLastSeen(userId) {
+  await dbRun(`UPDATE users SET last_seen_at=? WHERE id=?`, [nowMs(), String(userId)]);
 }
 
 async function updateLastIp(userId, ip) {
@@ -1057,7 +1069,10 @@ app.get("/api/owner/state", async (req, res) => {
     if (!requireOwner(req, res)) return;
 
     const lockdownEnabled = await getLockdownEnabled();
-    const activeUsers = await dbGet(`SELECT COUNT(*) AS c FROM users WHERE banned_until=0 OR banned_until<=?`, [nowMs()]);
+    
+    // Active users = users seen within last 10 minutes
+    const tenMinutesAgo = nowMs() - (10 * 60 * 1000);
+    const activeUsers = await dbGet(`SELECT COUNT(*) AS c FROM users WHERE last_seen_at > ?`, [tenMinutesAgo]);
     const bannedUsers = await dbGet(`SELECT COUNT(*) AS c FROM users WHERE banned_until>?`, [nowMs()]);
 
     return res.json({
@@ -1926,6 +1941,7 @@ app.use("/divine", async (req, res, next) => {
     if (!user) return res.redirect(302, "/");
 
     try { await updateLastIp(user.id, getReqIp(req)); } catch {}
+    try { await updateLastSeen(user.id); } catch {}
 
     if (await isUserBanned(user)) {
       clearUserCookie(res);

@@ -546,21 +546,59 @@
     }
 
     if (act === "revoke") {
-      toast(`Revoke requested for ${username} (API needed).`);
-      // expected: POST /api/owner/users/revoke { username }
+      if (!confirm(`Revoke token for ${username}? They'll be logged out immediately.`)) return;
+      try {
+        const res = await fetch("/api/owner/users/revoke", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          toast(data.error || "Revoke failed");
+          return;
+        }
+        toast(`Token revoked for ${username}`);
+        await refreshUsers();
+      } catch (e) {
+        toast("Network error");
+      }
       return;
     }
     if (act === "redirect") {
       const url = prompt("Redirect URL (next page load only):", "https://example.com");
       if (!url) return;
-      toast(`Redirect set for ${username} (API needed).`);
-      // expected: POST /api/owner/users/redirect { username, url }
+      try {
+        const res = await fetch("/api/owner/users/redirect", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, url })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          toast(data.error || "Redirect failed");
+          return;
+        }
+        toast(`Redirect set for ${username}`);
+      } catch (e) {
+        toast("Network error");
+      }
       return;
     }
     if (act === "view") {
       selectView("activity");
-      toast(`View activity for ${username} (API needed).`);
-      // expected: GET /api/owner/activity?user=username
+      try {
+        const res = await fetch(`/api/owner/activity?user=${encodeURIComponent(username)}`);
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          toast(data.error || "Failed to load activity");
+          return;
+        }
+        renderActivityTable(data.activity || []);
+        toast(`Showing activity for ${username}`);
+      } catch (e) {
+        toast("Network error");
+      }
       return;
     }
   });
@@ -602,6 +640,32 @@
     banReason.value = "";
     banMsg.textContent = "";
     try { banModal.showModal(); } catch { toast("Your browser doesn't support <dialog>."); }
+  });
+
+  // Unban button handler (event delegation)
+  bansBody.addEventListener("click", async (e) => {
+    const btn = e.target && e.target.closest && e.target.closest("button[data-ban-act='unban']");
+    if (!btn) return;
+    const username = btn.getAttribute("data-user");
+    if (!username || !confirm(`Unban ${username}?`)) return;
+    
+    toast("Unbanning...");
+    try {
+      const res = await fetch("/api/owner/unban", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        toast(data.error || "Unban failed");
+        return;
+      }
+      toast(`Unbanned ${username}`);
+      await loadBans();
+    } catch (e) {
+      toast("Network error");
+    }
   });
 
   banSubmitBtn.addEventListener("click", async () => {
@@ -653,8 +717,26 @@
     if (!btn) return;
     const act = btn.getAttribute("data-report-act");
     if (act === "dismiss") {
-      toast("Dismiss (API needed).");
-      // expected: POST /api/owner/reports/dismiss { id }
+      const id = btn.getAttribute("data-report-id");
+      if (!id || !confirm("Dismiss this report?")) return;
+      
+      toast("Dismissing...");
+      try {
+        const res = await fetch("/api/owner/reports/dismiss", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: parseInt(id, 10) })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          toast(data.error || "Dismiss failed");
+          return;
+        }
+        toast("Report dismissed");
+        await loadReports();
+      } catch (e) {
+        toast("Network error");
+      }
       return;
     }
     if (act === "ban") {
