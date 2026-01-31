@@ -82,7 +82,7 @@ function setUserCookie(res, token) {
   const isProd = CONFIG.nodeEnv === "production";
   res.cookie(COOKIE_USER, token, {
     httpOnly: true,
-    sameSite: "Strict",
+    sameSite: "Lax",
     secure: isProd,
     path: "/",
     maxAge: CONFIG.jwtExpiresDays * 24 * 60 * 60 * 1000,
@@ -93,7 +93,7 @@ function clearUserCookie(res) {
   const isProd = CONFIG.nodeEnv === "production";
   res.cookie(COOKIE_USER, "", {
     httpOnly: true,
-    sameSite: "Strict",
+    sameSite: "Lax",
     secure: isProd,
     path: "/",
     maxAge: 0,
@@ -105,7 +105,7 @@ function issueOwnerOnceCookie(res) {
   const token = jwt.sign({ ok: true, t: Date.now() }, CONFIG.jwtSecret, { expiresIn: "5m" });
   res.cookie(COOKIE_OWNER_ONCE, token, {
     httpOnly: true,
-    sameSite: "Strict",
+    sameSite: "Lax",
     secure: isProd,
     path: "/owner",
     maxAge: 5 * 60 * 1000,
@@ -124,7 +124,7 @@ function consumeOwnerOnceCookie(req, res) {
   const isProd = CONFIG.nodeEnv === "production";
   res.cookie(COOKIE_OWNER_ONCE, "", {
     httpOnly: true,
-    sameSite: "Strict",
+    sameSite: "Lax",
     secure: isProd,
     path: "/owner",
     maxAge: 0,
