@@ -31,7 +31,7 @@ const CONFIG = {
   authPin: requireEnv("AUTH_PIN"),
   ownerPin: requireEnv("OWNER_PIN"),
   jwtExpiresDays: parseInt(envStr("JWT_EXPIRES_DAYS", "7"), 10) || 7,
-  dbPath: envStr("DB_PATH", "/app/data/divine.sqlite"),
+  dbPath: envStr("DB_PATH", "./data/divine.sqlite"),
 
   // Env fallback only. Real lockdown state is stored in DB.
   lockdownEnabledEnv: envStr("LOCKDOWN_ENABLED", "0") === "1",
