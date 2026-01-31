@@ -8,6 +8,8 @@ const jwt = require("jsonwebtoken");
 const sqlite3 = require("sqlite3").verbose();
 const http = require("http");
 const WebSocket = require("ws");
+// trust proxy bug fix
+app.set("trust proxy", true);
 
 // -----------------------
 // Config
