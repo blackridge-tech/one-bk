@@ -79,7 +79,7 @@ function randomToken(bytes = 32) {
 }
 
 function createJWT(userId) {
-  const expiresIn = CONFIG.accessExpiresDays + 'd';
+  const expiresIn = `${CONFIG.accessExpiresDays}d`;
   return jwt.sign({ userId: String(userId) }, CONFIG.jwtSecret, { expiresIn });
 }
 
@@ -121,13 +121,20 @@ async function issueUserSession(res, userId) {
 
 async function revokeUserSessions(userId) {
   // JWT tokens cannot be revoked server-side without a blacklist
-  // For now, we'll keep this function for API compatibility but it won't do anything
-  // In production, you'd implement a token blacklist if needed
+  // This function is kept for API compatibility but currently does nothing
+  // SECURITY NOTE: JWTs remain valid until expiration even after this is called
+  // For security-critical operations (password changes, account compromise):
+  //   1. Clear the user's cookie immediately
+  //   2. Tokens will remain valid until they expire (default: 7 days)
+  //   3. Consider implementing a token blacklist for immediate revocation
 }
 
 async function revokeCurrentSession(req) {
   // JWT tokens cannot be revoked server-side without a blacklist
-  // For now, we'll keep this function for API compatibility but it won't do anything
+  // This function is kept for API compatibility but currently does nothing
+  // SECURITY NOTE: The JWT token will remain valid until expiration
+  // The cookie should be cleared on logout, which prevents browser reuse
+  // However, if the token was copied elsewhere, it remains valid until expiry
 }
 
 function issueOwnerOnceCookie(res) {
