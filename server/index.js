@@ -530,6 +530,12 @@ async function getOrCreateClient(clientId, ip, deviceInfo = null) {
     return { client_id: clientId, status: "verified", last_seen_at: now, last_ip: ip, device_info: deviceInfo, created_at: now };
   }
   
+  // Update last seen and device info for existing client
+  await dbRun(
+    `UPDATE clients SET last_seen_at=?, last_ip=?, device_info=COALESCE(?, device_info) WHERE client_id=?`,
+    [now, ip, deviceInfo, clientId]
+  );
+  
   return client;
 }
 
@@ -681,9 +687,12 @@ const sendRepoFile = (res, relPath) => res.sendFile(path.join(REPO_ROOT, relPath
 app.get("/", async (req, res) => {
   try {
     // Check if user has access cookie - if so, redirect to /divine
-    const user = await verifyUserFromRequest(req);
-    if (user) {
-      return res.redirect(302, "/divine/");
+    // Only verify if cookie exists to avoid unnecessary DB queries
+    if (req.cookies[COOKIE_USER]) {
+      const user = await verifyUserFromRequest(req);
+      if (user) {
+        return res.redirect(302, "/divine/");
+      }
     }
 
     const enabled = await getLockdownEnabled();
@@ -889,12 +898,6 @@ app.post("/api/check", async (req, res) => {
 
     const ip = getReqIp(req);
     const client = await getOrCreateClient(clientId, ip);
-    
-    // Update last seen
-    await dbRun(
-      `UPDATE clients SET last_seen_at=?, last_ip=? WHERE client_id=?`,
-      [nowMs(), ip, clientId]
-    );
 
     const status = String(client.status || "verified");
     const banned = status === "banned";
@@ -915,15 +918,8 @@ app.post("/api/hello", async (req, res) => {
     const device = req.body?.device || {};
     const deviceInfo = safeStringifyDevice(device);
     const ip = getReqIp(req);
-    const now = nowMs();
 
-    const client = await getOrCreateClient(clientId, ip, deviceInfo);
-    
-    // Update existing client with device info
-    await dbRun(
-      `UPDATE clients SET last_seen_at=?, last_ip=?, device_info=? WHERE client_id=?`,
-      [now, ip, deviceInfo, clientId]
-    );
+    await getOrCreateClient(clientId, ip, deviceInfo);
 
     return res.json({ ok: true });
   } catch (err) {
