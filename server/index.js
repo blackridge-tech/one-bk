@@ -615,6 +615,8 @@ app.disable("x-powered-by");
 // IMPORTANT: for most hosts you SHOULD set trust proxy true if behind a proxy
 // but leaving your original behavior unchanged.
 app.set("trust proxy", false);
+// Enable strict routing so /divine and /divine/ are treated as different routes
+app.set("strict routing", true);
 
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cookieParser());
@@ -671,6 +673,7 @@ app.get("/divine/u/:username", (req, res) => sendRepoFile(res, "divine/user/inde
 
 // Convenience
 app.get("/divine", (req, res) => res.redirect(302, "/divine/"));
+app.get("/divine/", (req, res) => sendRepoFile(res, "divine/index.html"));
 
 // -----------------------
 // Global gate behavior (lockdown + redirect logged-in users away from gate)
@@ -1965,6 +1968,7 @@ app.use("/divine", async (req, res, next) => {
   try {
     const user = await verifyUserFromRequest(req);
     if (!user) return res.redirect(302, "/");
+
 
     try { await updateLastIp(user.id, getReqIp(req)); } catch {}
     try { await updateLastSeen(user.id); } catch {}
