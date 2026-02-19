@@ -1969,7 +1969,6 @@ app.use("/divine", async (req, res, next) => {
     const user = await verifyUserFromRequest(req);
     if (!user) return res.redirect(302, "/");
 
-
     try { await updateLastIp(user.id, getReqIp(req)); } catch {}
     try { await updateLastSeen(user.id); } catch {}
 
