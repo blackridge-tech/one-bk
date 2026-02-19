@@ -181,6 +181,14 @@ function clampStr(s, maxLen) {
   return x.length > maxLen ? x.slice(0, maxLen) : x;
 }
 
+function validClientId(cid) {
+  if (!cid || typeof cid !== "string") return false;
+  if (cid.length < 8 || cid.length > 128) return false;
+  // Allow alphanumeric, hyphens, and underscores (typical UUID/GUID format)
+  if (!/^[a-zA-Z0-9_-]+$/.test(cid)) return false;
+  return true;
+}
+
 function fmtTimeSec(ms) {
   try {
     const d = new Date(Number(ms || 0));
@@ -895,6 +903,7 @@ app.post("/api/check", async (req, res) => {
   try {
     const clientId = String(req.body?.clientID || "").trim();
     if (!clientId) return res.status(400).json({ ok: false, error: "Missing clientID" });
+    if (!validClientId(clientId)) return res.status(400).json({ ok: false, error: "Invalid clientID format" });
 
     const ip = getReqIp(req);
     const client = await getOrCreateClient(clientId, ip);
@@ -914,6 +923,7 @@ app.post("/api/hello", async (req, res) => {
   try {
     const clientId = String(req.body?.clientID || "").trim();
     if (!clientId) return res.status(400).json({ ok: false, error: "Missing clientID" });
+    if (!validClientId(clientId)) return res.status(400).json({ ok: false, error: "Invalid clientID format" });
 
     const device = req.body?.device || {};
     const deviceInfo = safeStringifyDevice(device);
