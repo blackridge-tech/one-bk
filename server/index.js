@@ -424,6 +424,18 @@ CREATE TABLE IF NOT EXISTS dm_appeals (
 );`);
   await dbRun(`CREATE INDEX IF NOT EXISTS idx_dm_appeals_status ON dm_appeals(status, created_at);`);
 
+  // Client tracking table for /api/check and /api/hello
+  await dbRun(`
+CREATE TABLE IF NOT EXISTS clients (
+  client_id TEXT PRIMARY KEY,
+  status TEXT NOT NULL DEFAULT 'verified',
+  last_seen_at INTEGER NOT NULL,
+  last_ip TEXT,
+  device_info TEXT,
+  created_at INTEGER NOT NULL
+);`);
+  await dbRun(`CREATE INDEX IF NOT EXISTS idx_clients_status ON clients(status);`);
+
   // Ensure a default lockdown value exists (env is fallback only)
   const existing = await dbGet(`SELECT v FROM owner_state WHERE k='lockdown_enabled'`);
   if (!existing) {
@@ -831,6 +843,76 @@ app.post("/api/logout", async (req, res) => {
   try { await revokeCurrentSession(req); } catch {}
   clearUserCookie(res);
   return res.json({ ok: true });
+});
+
+// Client access control endpoints for clientID-based flow
+app.post("/api/check", async (req, res) => {
+  try {
+    const clientId = String(req.body?.clientID || "").trim();
+    if (!clientId) return res.status(400).json({ ok: false, error: "Missing clientID" });
+
+    const ip = getReqIp(req);
+    const now = nowMs();
+
+    // Get or create client record
+    let client = await dbGet(`SELECT * FROM clients WHERE client_id=?`, [clientId]);
+    
+    if (!client) {
+      // New client - default to verified status
+      await dbRun(
+        `INSERT INTO clients(client_id, status, last_seen_at, last_ip, created_at) VALUES(?,?,?,?,?)`,
+        [clientId, "verified", now, ip, now]
+      );
+      return res.json({ ok: true, status: "verified", allowed: true });
+    }
+
+    // Update last seen
+    await dbRun(
+      `UPDATE clients SET last_seen_at=?, last_ip=? WHERE client_id=?`,
+      [now, ip, clientId]
+    );
+
+    const status = String(client.status || "verified");
+    const banned = status === "banned";
+    const allowed = status === "verified";
+
+    return res.json({ ok: true, status, banned, allowed });
+  } catch {
+    return res.status(500).json({ ok: false, error: "Server error" });
+  }
+});
+
+app.post("/api/hello", async (req, res) => {
+  try {
+    const clientId = String(req.body?.clientID || "").trim();
+    if (!clientId) return res.status(400).json({ ok: false, error: "Missing clientID" });
+
+    const device = req.body?.device || {};
+    const deviceInfo = JSON.stringify(device);
+    const ip = getReqIp(req);
+    const now = nowMs();
+
+    // Get or create client record
+    let client = await dbGet(`SELECT * FROM clients WHERE client_id=?`, [clientId]);
+    
+    if (!client) {
+      // New client
+      await dbRun(
+        `INSERT INTO clients(client_id, status, last_seen_at, last_ip, device_info, created_at) VALUES(?,?,?,?,?,?)`,
+        [clientId, "verified", now, ip, deviceInfo, now]
+      );
+    } else {
+      // Update existing client with device info
+      await dbRun(
+        `UPDATE clients SET last_seen_at=?, last_ip=?, device_info=? WHERE client_id=?`,
+        [now, ip, deviceInfo, clientId]
+      );
+    }
+
+    return res.json({ ok: true });
+  } catch {
+    return res.status(500).json({ ok: false, error: "Server error" });
+  }
 });
 
 // Ban info and appeal page
