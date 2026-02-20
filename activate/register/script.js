@@ -27,6 +27,14 @@
   tabRegister.addEventListener("click", () => select("register"));
   tabRecover.addEventListener("click", () => select("recover"));
 
+  (function selectInitialTab(){
+    const q = new URLSearchParams(location.search);
+    const tab = String(q.get("tab") || "").toLowerCase();
+    if (tab === "register") return select("register");
+    if (tab === "recover") return select("recover");
+    return select("login");
+  })();
+
   back.addEventListener("click", () => location.href = "/");
 
   function setMsg(el, text, kind){

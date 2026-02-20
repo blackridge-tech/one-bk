@@ -279,7 +279,53 @@
 
 
   //
-  // 3) DM Badge Updates (unread count + pending requests)
+  // 3) Home auth gate popup (for /divine when not logged in)
+  //
+  (function initHomeAuthGate() {
+    const gate = document.getElementById('authGate');
+    if (!gate) return;
+
+    function showGate() {
+      gate.hidden = false;
+      document.body.style.overflow = 'hidden';
+    }
+
+    function hideGate() {
+      gate.hidden = true;
+      document.body.style.overflow = '';
+    }
+
+    async function checkLoginState() {
+      try {
+        const res = await fetch('/api/me', {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          credentials: 'same-origin'
+        });
+
+        if (!res.ok) {
+          showGate();
+          return;
+        }
+
+        const json = await res.json().catch(() => ({}));
+        if (!json || !json.ok || !json.user) {
+          showGate();
+          return;
+        }
+
+        hideGate();
+      } catch (e) {
+        showGate();
+      }
+    }
+
+    checkLoginState();
+  })();
+
+
+  //
+  // 4) DM Badge Updates (unread count + pending requests)
   //
   (function initDmBadges() {
     const badgeDotReq = document.getElementById('badgeDotReq');

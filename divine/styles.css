@@ -105,6 +105,56 @@ a{ text-decoration:none; color:inherit; }
   text-shadow: 0 8px 40px rgba(163,75,255,0.20);
 }
 
+.auth-gate{
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(5, 5, 10, 0.84);
+  backdrop-filter: blur(8px);
+}
+
+.auth-gate-card{
+  width: min(560px, 100%);
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+  box-shadow: var(--shadow);
+  padding: 24px;
+  text-align: center;
+}
+
+.auth-gate-card h2{
+  margin: 0;
+  color: var(--gold);
+  font-size: clamp(1.2rem, 2.6vw, 1.65rem);
+  font-weight: 950;
+}
+
+.auth-gate-actions{
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.auth-gate-btn{
+  min-height: 58px;
+}
+
+.auth-gate-link{
+  color: var(--text);
+  font-weight: 900;
+  text-decoration: underline;
+}
+
+.auth-gate-link:hover,
+.auth-gate-link:focus{
+  color: var(--gold2);
+}
+
 /* Main container */
 .container{
   max-width: var(--max-width);

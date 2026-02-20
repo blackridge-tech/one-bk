@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Update Log — Divine One</title>
 
-  <!-- Early cookie check: redirect to 404 if no divine_access cookie -->
+  <!-- Early cookie check: redirect to /divine if no divine_access cookie -->
   <script>
   (function(){
     try {
@@ -14,7 +14,7 @@
       var has = false;
     }
     if (!has) {
-      location.replace('/404.html' + location.search + location.hash);
+      location.replace('/divine/' + location.search + location.hash);
     }
   })();
   </script>

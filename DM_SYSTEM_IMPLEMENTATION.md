@@ -176,11 +176,11 @@ Six new tables were added to support the DM system:
 ### Environment Variables
 Existing environment variables from the Node server are used:
 - `PORT` - Server port (default: 3000)
-- `JWT_SECRET` - Required for auth
+- `JWT_SECRET` - Required for JWT authentication
 - `AUTH_PIN` - User access PIN
 - `OWNER_PIN` - Owner panel PIN
 - `DB_PATH` - SQLite database path
-- `JWT_EXPIRES_DAYS` - JWT expiry (default: 7)
+- `ACCESS_EXPIRES_DAYS` - JWT expiry in days (default: 7)
 
 ### Dependencies
 New dependency added:

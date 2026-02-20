@@ -31,7 +31,7 @@
         return;
       }
       setMsg("Verified. Redirecting…", "ok");
-      setTimeout(() => (location.href = "/activate/register"), 250);
+      setTimeout(() => (location.href = "/divine/"), 250);
     } catch (e) {
       setMsg("Request failed", "err");
     } finally {
